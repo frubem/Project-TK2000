@@ -1,0 +1,4 @@
+Lista de tarefas:
+
+  - Adicionar opção para escolha de qual arquivo tocar dentro do CT2
+

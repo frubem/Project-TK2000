@@ -1,0 +1,3 @@
+Mudanças na versão 1.0
+
+ - Primeira Versão lançada ao público

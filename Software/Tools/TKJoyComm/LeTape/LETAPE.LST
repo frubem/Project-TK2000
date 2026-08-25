@@ -1,0 +1,414 @@
+0001   0000             ; LeTape - 
+0002   0000             ; by Fábio Belavenuto - Copyright 2004
+0003   0000             
+0004   0000             ; Versão 0.1
+0005   0000             
+0006   0000             ;Este arquivo é distribuido pela Licença Pública Geral GNU.
+0007   0000             ;Veja o arquivo Licenca.txt distribuido com este software.
+0008   0000             
+0009   0000             ;ESTE SOFTWARE NÃO OFERECE NENHUMA GARANTIA
+0010   0000             
+0011   0000             ; Esse código fonte deve ser compilado com o Table Assembler
+0012   0000             
+0013   0000             CH	.EQU	$24			; HTAB
+0014   0000             CV	.EQU	$25			; VTAB
+0015   0000             CS	.EQU	$2E			; Checksum
+0016   0000             ENDI	.EQU	$3C
+0017   0000             ENDF	.EQU	$3E
+0018   0000             
+0019   0000             TAM	.EQU	$F0
+0020   0000             END	.EQU	$F2
+0021   0000             SEND	.EQU	$F4
+0022   0000             COMP	.EQU	$F6
+0023   0000             VALOR	.EQU	$F8
+0024   0000             QTDE	.EQU	$F9
+0025   0000             
+0026   0000             KBOUT	.EQU	$C000
+0027   0000             KBIN	.EQU	$C010
+0028   0000             LEBYTES .EQU	$EE20
+0029   0000             PRNTAX	.EQU	$F941
+0030   0000             RECSIN2	.EQU	$FCFA
+0031   0000             RECSIN1	.EQU	$FCFD
+0032   0000             LEBYTE	.EQU	$FCEC
+0033   0000             COUT	.EQU	$FDED
+0034   0000             PRBYTE	.EQU	$FDDA
+0035   0000             PRERR	.EQU	$FF2D
+0036   0000             
+0037   0000             COMMEM	.EQU	$0C00
+0038   0000             
+0039   0900             	.ORG	$0900
+0040   0900             
+0041   0900             ; -----------------------------------------------------------------------------
+0042   0900             INICIO
+0043   0900             	; TAREFA: Mudar para pagina 2 de vídeo (MP)
+0044   0900             
+0045   0900 20 8C 0A    	JSR	IMPRIME_ESP		; Imprime mensagem de espera
+0046   0903 20 F6 0A    	JSR	RECEBEBYTE		; Recebe quantidade de arquivos para ler
+0047   0906 85 F9       	STA	QTDE
+0048   0908 20 9C 0A    	JSR	IMPRIME_MAN		; Imprime mensagem da quantidade de arquivos
+0049   090B A5 F9       	LDA	QTDE
+0050   090D 20 DA FD    	JSR	PRBYTE			; Imprime em Hexa a quantidade de Arquivo
+0051   0910 A9 8D       	LDA	#$8D
+0052   0912 20 ED FD    	JSR	COUT
+0053   0915             
+0054   0915 A9 00       	LDA	#COMMEM & $FF		; Configura endereço inicial COMMEM
+0055   0917 85 3C       	STA	ENDI
+0056   0919 85 F2       	STA	END
+0057   091B 85 F4       	STA	SEND
+0058   091D A9 0C       	LDA	#COMMEM >> 8
+0059   091F 85 3D       	STA	ENDI+1
+0060   0921 85 F3       	STA	END+1
+0061   0923 85 F5       	STA	SEND+1
+0062   0925 A9 07       	LDA	#(COMMEM + 7) & $FF	; Configura endereço final COMMEM + 7
+0063   0927 85 3E       	STA	ENDF
+0064   0929 A9 0C       	LDA	#COMMEM >> 8
+0065   092B 85 3F       	STA	ENDF+1
+0066   092D             INICIO_LG
+0067   092D C6 F9       	DEC	QTDE
+0068   092F A5 F9       	LDA	QTDE
+0069   0931 C9 FF       	CMP	#$FF			; Decrementa quantidade para verificar se acabou
+0070   0933 F0 6E       	BEQ	INICIO_FIM
+0071   0935 A2 00       	LDX	#$00			; Gera um atraso
+0072   0937 A0 00       	LDY	#$00
+0073   0939 A9 05       	LDA	#5
+0074   093B             INICIO_A1
+0075   093B C8          	INY
+0076   093C D0 FD       	BNE	INICIO_A1
+0077   093E E8          	INX
+0078   093F D0 FA       	BNE	INICIO_A1
+0079   0941 38          	SEC
+0080   0942 E9 01       	SBC	#1
+0081   0944 D0 F5       	BNE	INICIO_A1
+0082   0946             INICIO_L1
+0083   0946 20 BE 09    	JSR	LERBLOCO		; Le 1 bloco
+0084   0949 A5 2E       	LDA	CS			; Verifica se o Checksum é 0
+0085   094B D0 69       	BNE	ERRO			; Se não for 0 teve erro
+0086   094D A0 07       	LDY	#7
+0087   094F B1 F4       	LDA	(SEND),Y		; Verifica se o Bloco é o 0
+0088   0951 D0 22       	BNE	INICIO_BN0		; Se não for pula
+0089   0953             
+0090   0953 A0 0A       	LDY	#$A			; Bloco 0 - Ler Endereco Inicial e Final para
+0091   0955 B1 F4       	LDA	(SEND),Y		;           calcular tamanho do arquivo
+0092   0957 38          	SEC
+0093   0958 A0 08       	LDY	#8
+0094   095A F1 F4       	SBC	(SEND),Y		; Faz End. Final - End. Inicial + 1
+0095   095C 85 F6       	STA	COMP
+0096   095E A0 0B       	LDY	#$B
+0097   0960 B1 F4       	LDA	(SEND),Y
+0098   0962 A0 09       	LDY	#9
+0099   0964 F1 F4       	SBC	(SEND),Y
+0100   0966 85 F7       	STA	COMP+1
+0101   0968 A5 F6       	LDA	COMP
+0102   096A 18          	CLC
+0103   096B 69 01       	ADC	#1
+0104   096D 85 F6       	STA	COMP
+0105   096F A5 F7       	LDA	COMP+1
+0106   0971 69 00       	ADC	#0
+0107   0973 85 F7       	STA	COMP+1
+0108   0975             INICIO_BN0				; Bloco > 0
+0109   0975 20 21 0A    	JSR	IMPRIMEINF		; Imprime informações
+0110   0978 A5 3E       	LDA	ENDF
+0111   097A 18          	CLC
+0112   097B 69 01       	ADC	#1			; Faz EndI = EndF+1
+0113   097D 85 3C       	STA	ENDI
+0114   097F 85 F4       	STA	SEND
+0115   0981 A5 3F       	LDA	ENDF+1
+0116   0983 69 00       	ADC	#0
+0117   0985 85 3D       	STA	ENDI+1
+0118   0987             
+0119   0987 A5 3C       	LDA	ENDI
+0120   0989 85 F4       	STA	SEND			; Faz SEND = EndI
+0121   098B 18          	CLC
+0122   098C 69 07       	ADC	#7			; Agora faz EndF = EndI+7
+0123   098E 85 3E       	STA	ENDF
+0124   0990 A5 3D       	LDA	ENDI+1
+0125   0992 85 F5       	STA	SEND+1
+0126   0994 69 00       	ADC	#0
+0127   0996 85 3F       	STA	ENDF+1
+0128   0998             
+0129   0998 A5 F7       	LDA	COMP+1
+0130   099A D0 AA       	BNE	INICIO_L1		; Verifica se o comprimento chegou a 0
+0131   099C A5 F6       	LDA	COMP
+0132   099E D0 A6       	BNE	INICIO_L1
+0133   09A0 4C 2D 09    	JMP	INICIO_LG		; Se acabou um arquivo, refaz o loop geral
+0134   09A3             
+0135   09A3             INICIO_FIM	
+0136   09A3 A5 3C       	LDA	ENDI
+0137   09A5 85 F0       	STA	TAM
+0138   09A7 A5 3D       	LDA	ENDI+1
+0139   09A9 38          	SEC
+0140   09AA E9 0C       	SBC	#COMMEM >> 8
+0141   09AC 85 F1       	STA	TAM+1
+0142   09AE             ;	LDA	#'E' | $80
+0143   09AE             ;	JSR	COUT
+0144   09AE             ;	LDA	#'N' | $80
+0145   09AE             ;	JSR	COUT
+0146   09AE             ;	LDA	#'V' | $80
+0147   09AE             ;	JSR	COUT
+0148   09AE A9 00       	LDA	#0			; Envia 0 para o PC indicando sem erros
+0149   09B0 20 C9 0A    	JSR	ENVIABYTE
+0150   09B3 4C 5F 0A    	JMP	ENVMEM
+0151   09B6             
+0152   09B6             ; -----------------------------------------------------------------------------
+0153   09B6             ERRO
+0154   09B6 A9 01       	LDA	#1			; Envia 1 para o PC indicando erro
+0155   09B8 20 C9 0A    	JSR	ENVIABYTE
+0156   09BB 4C 2D FF    	JMP	PRERR
+0157   09BE             
+0158   09BE             ; -----------------------------------------------------------------------------
+0159   09BE             LERBLOCO
+0160   09BE A9 FF       	LDA	#$FF
+0161   09C0 85 2E       	STA	CS
+0162   09C2             LERBLOCO_L1
+0163   09C2 A2 10       	LDX	#$10
+0164   09C4             LERBLOCO_L2
+0165   09C4 A0 25       	LDY	#$25			; Espera 16 vezes o cabecalho B
+0166   09C6 20 FD FC    	JSR	RECSIN1
+0167   09C9 90 F7       	BCC	LERBLOCO_L1
+0168   09CB CA          	DEX
+0169   09CC D0 F6       	BNE	LERBLOCO_L2
+0170   09CE A0 FF       	LDY	#$FF
+0171   09D0 20 FD FC    	JSR	RECSIN1
+0172   09D3             LERBLOCO_L3
+0173   09D3 A0 24       	LDY	#$24			; Pula restante do cabecalho B
+0174   09D5 20 FD FC    	JSR	RECSIN1
+0175   09D8 B0 F9       	BCS	LERBLOCO_L3
+0176   09DA 20 FD FC    	JSR	RECSIN1			; Pula bit stop 0
+0177   09DD A0 3A       	LDY	#$3A
+0178   09DF 20 20 EE    	JSR	LEBYTES			; Ler bytes de ($3C) até ($3E)
+0179   09E2 20 E9 09    	JSR	VERBLOCO
+0180   09E5 20 20 EE    	JSR	LEBYTES			; Ler bytes de ($3C) até ($3E)
+0181   09E8             ;	LDY	#$34
+0182   09E8             ;	JSR	LEBYTE			; Ler Checksum
+0183   09E8             ;	CMP	CS
+0184   09E8             ;	BNE	ERRO
+0185   09E8 60          	RTS				; Retorna
+0186   09E9             
+0187   09E9             ; -----------------------------------------------------------------------------
+0188   09E9             VERBLOCO
+0189   09E9 A1 3E       	LDA	(ENDF,X)
+0190   09EB F0 2A       	BEQ	VERBLOCO_E0		; Se for o bloco 0, pula
+0191   09ED A5 F7       	LDA	COMP+1			; Bloco > 0, ler mais bytes
+0192   09EF D0 14       	BNE	VERBLOCO_P1
+0193   09F1 A5 3E       	LDA	ENDF			; bloco < 256
+0194   09F3 38          	SEC				; Somar 1 por causa do Checksum
+0195   09F4 65 F6       	ADC	COMP
+0196   09F6 85 3E       	STA	ENDF
+0197   09F8 A5 3F       	LDA	ENDF+1
+0198   09FA 69 00       	ADC	#$00
+0199   09FC 85 3F       	STA	ENDF+1
+0200   09FE A9 00       	LDA	#$00
+0201   0A00 85 F6       	STA	COMP
+0202   0A02 A0 32       	LDY	#$32
+0203   0A04 60          	RTS
+0204   0A05             VERBLOCO_P1
+0205   0A05 A5 3E       	LDA	ENDF			; bloco >= 256
+0206   0A07 18          	CLC
+0207   0A08 69 01       	ADC	#1			; Somar 1 por causa do Checksum
+0208   0A0A 85 3E       	STA	ENDF
+0209   0A0C A5 3F       	LDA	ENDF+1
+0210   0A0E 69 01       	ADC	#1
+0211   0A10 85 3F       	STA	ENDF+1
+0212   0A12 C6 F7       	DEC	COMP+1
+0213   0A14 A0 32       	LDY	#$32
+0214   0A16 60          	RTS
+0215   0A17             VERBLOCO_E0
+0216   0A17 A5 3E       	LDA	ENDF
+0217   0A19 18          	CLC
+0218   0A1A 69 05       	ADC	#$05			; 4 + 1 do Checksum
+0219   0A1C 85 3E       	STA	ENDF
+0220   0A1E A0 34       	LDY	#$34
+0221   0A20 60          	RTS
+0222   0A21             
+0223   0A21             ; -----------------------------------------------------------------------------
+0224   0A21             IMPRIMEINF
+0225   0A21 60          	RTS
+0226   0A22 A9 17       	LDA	#23
+0227   0A24 85 25       	STA	CV
+0228   0A26 A0 00       	LDY	#0
+0229   0A28 84 24       	STY	CH
+0230   0A2A             IMPRIME_L1
+0231   0A2A B1 F4       	LDA	(SEND),Y
+0232   0A2C 20 ED FD    	JSR	COUT
+0233   0A2F C8          	INY
+0234   0A30 C0 06       	CPY	#6
+0235   0A32 D0 F6       	BNE	IMPRIME_L1
+0236   0A34             IMPRIME_L2
+0237   0A34 A9 A0       	LDA	#' ' | $80
+0238   0A36 20 ED FD    	JSR	COUT
+0239   0A39 B1 F4       	LDA	(SEND),Y
+0240   0A3B 20 DA FD    	JSR	PRBYTE
+0241   0A3E C8          	INY
+0242   0A3F C0 07       	CPY	#7
+0243   0A41 D0 F1       	BNE	IMPRIME_L2
+0244   0A43 A9 A0       	LDA	#' ' | $80
+0245   0A45 20 ED FD    	JSR	COUT
+0246   0A48 A5 F7       	LDA	COMP+1
+0247   0A4A A6 F6       	LDX	COMP
+0248   0A4C 20 41 F9    	JSR	PRNTAX			; Imprime comprimento do arquivo
+0249   0A4F A9 A0       	LDA	#' ' | $80
+0250   0A51 20 ED FD    	JSR	COUT
+0251   0A54 A5 2E       	LDA	CS
+0252   0A56 20 DA FD    	JSR	PRBYTE			; Imprime Checksum calculado
+0253   0A59 A9 A0       	LDA	#' ' | $80
+0254   0A5B 20 ED FD    	JSR	COUT
+0255   0A5E 60          	RTS
+0256   0A5F             
+0257   0A5F             ; -----------------------------------------------------------------------------
+0258   0A5F             ENVMEM
+0259   0A5F A5 F0       	LDA	TAM
+0260   0A61 20 C9 0A    	JSR	ENVIABYTE
+0261   0A64 A5 F1       	LDA	TAM+1
+0262   0A66 20 C9 0A    	JSR	ENVIABYTE
+0263   0A69 A0 00       	LDY	#0
+0264   0A6B             ENVMEM_LOOP
+0265   0A6B C6 F0       	DEC	TAM
+0266   0A6D A5 F0       	LDA	TAM
+0267   0A6F C9 FF       	CMP	#$FF
+0268   0A71 D0 08       	BNE	ENVMEM_PULA1
+0269   0A73 C6 F1       	DEC	TAM+1
+0270   0A75 A5 F1       	LDA	TAM+1
+0271   0A77 C9 FF       	CMP	#$FF
+0272   0A79 F0 10       	BEQ	ENVMEM_FIM
+0273   0A7B             ENVMEM_PULA1
+0274   0A7B B1 F2       	LDA	(END),Y
+0275   0A7D 20 C9 0A    	JSR	ENVIABYTE
+0276   0A80 E6 F2       	INC	END
+0277   0A82 A5 F2       	LDA	END
+0278   0A84 D0 E5       	BNE	ENVMEM_LOOP
+0279   0A86 E6 F3       	INC	END+1
+0280   0A88 4C 6B 0A    	JMP	ENVMEM_LOOP
+0281   0A8B             ENVMEM_FIM
+0282   0A8B 60          	RTS
+0283   0A8C             
+0284   0A8C             ; -----------------------------------------------------------------------------
+0285   0A8C             IMPRIME_ESP
+0286   0A8C A0 00       	LDY	#0
+0287   0A8E             IMPRIME_ESP_L1
+0288   0A8E B9 32 0B    	LDA	MSG1,Y
+0289   0A91 F0 08       	BEQ	IMPRIME_ESP_FIM
+0290   0A93 09 80       	ORA	#$80
+0291   0A95 20 ED FD    	JSR	COUT
+0292   0A98 C8          	INY
+0293   0A99 D0 F3       	BNE	IMPRIME_ESP_L1
+0294   0A9B             IMPRIME_ESP_FIM
+0295   0A9B 60          	RTS
+0296   0A9C             
+0297   0A9C             ; -----------------------------------------------------------------------------
+0298   0A9C             IMPRIME_MAN
+0299   0A9C A0 00       	LDY	#0
+0300   0A9E             IMPRIME_MAN_L1
+0301   0A9E B9 40 0B    	LDA	MSG2,Y
+0302   0AA1 F0 08       	BEQ	IMPRIME_MAN_FIM
+0303   0AA3 09 80       	ORA	#$80
+0304   0AA5 20 ED FD    	JSR	COUT
+0305   0AA8 C8          	INY
+0306   0AA9 D0 F3       	BNE	IMPRIME_MAN_L1
+0307   0AAB             IMPRIME_MAN_FIM
+0308   0AAB 60          	RTS
+0309   0AAC             
+0310   0AAC             ; -----------------------------------------------------------------------------
+0311   0AAC             HANDSHAKING
+0312   0AAC A9 1F       	LDA	#00011111b
+0313   0AAE 8D 00 C0    	STA	KBOUT
+0314   0AB1             LOOP1
+0315   0AB1 AD 10 C0    	LDA	KBIN
+0316   0AB4 29 51       	AND	#01010001b
+0317   0AB6 C9 51       	CMP	#01010001b
+0318   0AB8 D0 F7       	BNE	LOOP1
+0319   0ABA             
+0320   0ABA A9 00       	LDA	#00000000b
+0321   0ABC 8D 00 C0    	STA	KBOUT
+0322   0ABF             LOOP2
+0323   0ABF AD 10 C0    	LDA	KBIN
+0324   0AC2 29 51       	AND	#01010001b
+0325   0AC4 C9 00       	CMP	#00000000b
+0326   0AC6 D0 F7       	BNE	LOOP2
+0327   0AC8 60          	RTS
+0328   0AC9             
+0329   0AC9             ; -----------------------------------------------------------------------------
+0330   0AC9             ENVIABYTE
+0331   0AC9 48          	PHA				; Envia Byte
+0332   0ACA 20 AC 0A    	JSR	HANDSHAKING
+0333   0ACD A2 02       	LDX	#2			; Repetir 2 vezes
+0334   0ACF             LOOPEB
+0335   0ACF A9 10       	LDA	#00010000b
+0336   0AD1 8D 00 C0    	STA	KBOUT
+0337   0AD4             LOOPE1
+0338   0AD4 AD 10 C0    	LDA	KBIN
+0339   0AD7 29 40       	AND	#01000000b
+0340   0AD9 C9 40       	CMP	#01000000b
+0341   0ADB D0 F7       	BNE	LOOPE1
+0342   0ADD             
+0343   0ADD 68          	PLA
+0344   0ADE 48          	PHA
+0345   0ADF 29 0F       	AND	#00001111b
+0346   0AE1 8D 00 C0    	STA	KBOUT
+0347   0AE4             LOOPE2
+0348   0AE4 AD 10 C0    	LDA	KBIN
+0349   0AE7 C9 00       	CMP	#00000000b
+0350   0AE9 D0 F9       	BNE	LOOPE2
+0351   0AEB             
+0352   0AEB 68          	PLA
+0353   0AEC 6A          	ROR	A
+0354   0AED 6A          	ROR	A
+0355   0AEE 6A          	ROR	A
+0356   0AEF 6A          	ROR	A
+0357   0AF0 48          	PHA
+0358   0AF1 CA          	DEX
+0359   0AF2 D0 DB       	BNE	LOOPEB
+0360   0AF4 68          	PLA
+0361   0AF5 60          	RTS
+0362   0AF6             
+0363   0AF6             ; -----------------------------------------------------------------------------
+0364   0AF6             RECEBEBYTE
+0365   0AF6 20 AC 0A    	JSR	HANDSHAKING
+0366   0AF9 A9 00       	LDA     #$00
+0367   0AFB 85 F8       	STA     VALOR
+0368   0AFD A2 04       	LDX	#4			; Repetir 4 vezes
+0369   0AFF             LOOPRB
+0370   0AFF A9 10       	LDA	#00010000b
+0371   0B01 8D 00 C0    	STA	KBOUT
+0372   0B04             LOOPR1
+0373   0B04 AD 10 C0    	LDA	KBIN
+0374   0B07 29 40       	AND	#01000000b
+0375   0B09 C9 40       	CMP	#01000000b
+0376   0B0B D0 F7       	BNE	LOOPR1
+0377   0B0D             
+0378   0B0D AD 10 C0    	LDA	KBIN
+0379   0B10 29 11       	AND	#00010001b
+0380   0B12 2A          	ROL	A
+0381   0B13 2A          	ROL	A
+0382   0B14 2A          	ROL	A
+0383   0B15 2A          	ROL	A
+0384   0B16 08          	PHP
+0385   0B17 2A          	ROL	A
+0386   0B18 2A          	ROL	A
+0387   0B19 2A          	ROL	A
+0388   0B1A 2A          	ROL	A
+0389   0B1B 66 F8       	ROR	VALOR
+0390   0B1D 28          	PLP
+0391   0B1E 66 F8       	ROR	VALOR
+0392   0B20 A9 00       	LDA	#00000000B
+0393   0B22 8D 00 C0    	STA	KBOUT
+0394   0B25             LOOPR2
+0395   0B25 AD 10 C0    	LDA	KBIN
+0396   0B28 C9 00       	CMP	#00000000b
+0397   0B2A D0 F9       	BNE	LOOPR2
+0398   0B2C             
+0399   0B2C CA          	DEX
+0400   0B2D D0 D0       	BNE	LOOPRB
+0401   0B2F A5 F8       	LDA	VALOR
+0402   0B31 60          	RTS
+0403   0B32             
+0404   0B32             MSG1
+0405   0B32 455350455241 	.TEXT	"ESPERANDO PC"
+0405   0B38 4E444F205043
+0406   0B3E 0D 00       	.DB	13,0
+0407   0B40             MSG2
+0408   0B40 454E56494152 	.TEXT	"ENVIAR "
+0408   0B46 20
+0409   0B47 00          	.DB	0
+0410   0B48             
+0411   0B48             	.END
+tasm: Number of errors = 0

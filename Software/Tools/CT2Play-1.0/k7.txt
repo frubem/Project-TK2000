@@ -1,0 +1,24 @@
+  ct2play [opções] <arquivos>
+
+  Opções:
+  -t <sps>    - Determina a taxa de amostragem em "Samples per Second".
+                Padrão: 44100 sps
+  -p <ms>     - Determina a duração do silêncio inicial.
+                Padrão: 1000 ms
+  -s <ms>     - Determina a duração do silêncio entre 2 arquivos.
+                Padrão: 500 ms
+  -c <ms>     - Determina a duração do cabeçalho.
+                Padrão: 3000 ms, Mínimo de 500 ms, Máximo de 5000 ms
+  -b <KBytes> - Determina o tamanho do buffer.
+                Padrão: 100 KBytes, Mínimo de 10 KBytes, Máximo de 1024 KBytes
+  -w <arq.>   - Gera um arquivo .wav ao invés de tocar na placa de som.
+
+  Os arquivos podem ser digitados em sequência.
+
+  Exemplos:
+    ct2play -p 1500 -s 1000 Jogo01.ct2 Jogo02.ct2
+    ct2play -w MeuJogo.wav MeuJogo.ct2
+
+
+
+

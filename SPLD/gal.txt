@@ -1,0 +1,128 @@
+Original HAL14L8  Equations
+The GAL20V8 equations disassembled from the HAL14L8:
+;PALASM Design Description
+
+;---------------------------------- Declaration Segment ------------
+TITLE:  MPF-II HAL14L8 REPLACEMENT   
+PATTERN 
+REVISION: 1
+AUTHOR: LAK  
+COMPANY 
+DATE     07/03/04
+
+CHIP  _MPF2  PAL20V8
+
+;---------------------------------- PIN Declarations ---------------
+PIN  1          CLK1                                               ;      
+PIN  2          A15                                              ;      
+PIN  3          A14                                              ;      
+PIN  4          A13                                              ;      
+PIN  5          A12                                              ;      
+PIN  6          A11                                              ;      
+PIN  7          A10                                              ;      
+PIN  8          A9                                               ;      
+PIN  9          A8                                               ;      
+PIN  10         PAGE1                                            ;IN     
+PIN  11         INH                                              ;IN      
+PIN  12         GND                                              ;      
+PIN  13         RAMSW                                            ;IN      
+PIN  14         USER1                                            ;IN      
+PIN  15         NC                                               ;      
+PIN  16         NC                                               ;      
+PIN  17         DEVSEL                                           ;OUT      
+PIN  18         IOSTROBE                                         ;OUT      
+PIN  19         IOSEL                                            ;OUT      
+PIN  20         ROM1                                             ;OUT      
+PIN  21         ROM2                                             ;OUT      
+PIN  22         ECAS                                             ;OUT      
+PIN  23         NC                                               ;SHORTED TO PIN 19      
+PIN  24         VCC                                              ;      
+
+;----------------------------------- Boolean Equation Segment ------
+;FOR MPF-II only
+;PAGE1 SW ?
+;ECAS low for ram < C000 and C100-FFFF
+;     high for eprom access
+;     low when accessing IO area C0xx
+;IOSEL must be at C0xx ,should not disable by USER1
+
+EQUATIONS
+/ROM1= /CLK1*INH*/RAMSW*A15*A14*/A13           
+       */(/CLK1*A15*A14*/A13*/A12*/A11*/A10*/A9*/A8)    ; NOT C0xx
+/ROM2= /CLK1*INH*/RAMSW*A15*A14*A13                     ;Exxx
+/IOSTROBE= /CLK1*INH*A15*A14*/A13*/A12*A11              ;C8xx-CFFF 2K
+/IOSEL=  /CLK1*A15*A14*/A13*/A12*/A11*/A10*/A9*/A8;C0xx
+/DEVSEL= /CLK1*USER1*A15*A14*/A13*/A12*/A11*/A10*/A9*/A8;C0xx
+/ECAS= ROM1*ROM2*IOSEL + RAMSW*IOSEL                    ;C100-FFFF
+
+;----------------------------------- Simulation Segment ------------
+SIMULATION
+
+;-------------------------------------------------------------------------
+
+  Download original MPF-II equations  original MPF-II JED
+
+
+=================================================
+Modified HAL14L8 Equations
+Added address A7 to  the GAL20V8 chip to reduce the IO range
+
+;OPALJR to compile
+;---------------------------------- Declaration Segment ------------
+;TITLE:  MPF-II HAL14L8 REPLACEMENT   
+;PATTERN 
+;REVISION: 2
+;AUTHOR: LAK  
+;COMPANY 
+;DATE     07/03/04
+
+CHIP  _MPF2  PAL20V8
+
+;---------------------------------- PIN Declarations ---------------
+CLK1=1
+A15=2                                                   
+A14=3                                                    
+A13=4                                                    
+A12=5                                                    
+A11=6                                                    
+A10=7
+A9=8                                                    
+A8=9                                                     
+PAGE1=10                                                
+INH=11                                     
+GND=12                                      
+RAMSW=13                                    
+USER1=14                                    
+NC=15                                       
+A7=16                
+DEVSEL=17               
+IOSTROBE=18             
+IOSEL=19                
+ROM1=20                 
+ROM2=21                 
+ECAS=22                 
+NC=23                
+VCC=24                                              ;      
+
+;----------------------------------- Boolean Equation Segment ------
+;FOR MPF-II only
+;PAGE1 SW ?
+;ECAS low for ram < C000 and C100-FFFF
+;     high for eprom access
+;     low when accessing IO area C0xx
+;IOSEL must be at C0xx ,should not disable by USER1
+;
+;17-11-2008:
+; Added A7 to the DEVSEL = C08X
+;
+EQUATIONS
+
+/ROM1= /CLK1*INH*/RAMSW*A15*A14*/A13*IOSEL
+/ROM2= /CLK1*INH*/RAMSW*A15*A14*A13                    
+/IOSTROBE= /CLK1*INH*A15*A14*/A13*/A12*A11             
+/IOSEL=  /CLK1*A15*A14*/A13*/A12*/A11*/A10*/A9*/A8
+/DEVSEL= /CLK1*USER1*A15*A14*/A13*/A12*/A11*/A10*/A9*/A8*A7
+/ECAS= ROM1*ROM2*IOSEL + RAMSW*IOSEL                   
+
+ Download modified GAL20V8 equations   modified GAL20V8 JED
+

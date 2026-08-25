@@ -1,0 +1,118 @@
+                 CT2Play - Tocador de arquivos .ct2
+                         by Fábio Belavenuto
+
+  Versão Atual: 1.0
+
+  Este software é capaz de ler arquivos .ct2 e gerar o som necessário
+para a leitura em algum computador TK2000. Os arquivos .ct2 contém a
+informação binária dos programas e/ou jogos gravados em fita.
+  Este software é distribuido pela Licença Pública Geral GNU. Veja o
+arquivo Licenca.txt distribuido com este software.
+
+  Atenção: ESTE SOFTWARE NÃO OFERECE NENHUMA GARANTIA.
+
+Instalação:
+===========
+
+  Não é necessária nenhuma instalação do software, só coloque o execu-
+tável em qualquer diretório e rode-o no prompt de comando.
+
+Desinstalação:
+==============
+
+  Apague o executável e o programa estará desinstalado.
+
+Uso:
+====
+
+  ct2play [opções] <arquivos>
+
+  Opções:
+  -t <sps>    - Determina a taxa de amostragem em "Samples per Second".
+                Padrão: 44100 sps
+  -p <ms>     - Determina a duração do silêncio inicial.
+                Padrão: 1000 ms
+  -s <ms>     - Determina a duração do silêncio entre 2 arquivos.
+                Padrão: 500 ms
+  -c <ms>     - Determina a duração do cabeçalho.
+                Padrão: 3000 ms, Mínimo de 500 ms, Máximo de 5000 ms
+  -b <KBytes> - Determina o tamanho do buffer.
+                Padrão: 100 KBytes, Mínimo de 10 KBytes, Máximo de 1024 KBytes
+  -w <arq.>   - Gera um arquivo .wav ao invés de tocar na placa de som.
+
+  Os arquivos podem ser digitados em sequência.
+
+  Exemplos:
+    ct2play -p 1500 -s 1000 Jogo01.ct2 Jogo02.ct2
+	ct2play -w MeuJogo.wav MeuJogo.ct2
+
+Mudanças:
+=========
+
+  Favor verificar o arquivo "Mudancas.txt"
+
+Tarefas:
+=========
+
+  Favor verificar o arquivo "Tarefas.txt"
+
+Contatando o autor:
+===================
+
+  Favor enviar um e-mail para fabio@fbelavenuto.hostiex.com
+
+Informações:
+============
+
+  Para que o TK2000 leia o som como se fosse de um tape, você necessita
+criar um cabo que ligue a saída de som do PC na entrada EAR do TK2000.
+  Esse cabo deve ser construído usando uns 5 metros no máximo de cabo
+de áudio com 1 plugue P2 estéreo macho numa ponta e 1 plugue P2 mono na
+outra ponta.
+  O certo é ligar o pino da ponta do plugue mono no pino da ponta do plugue
+estéreo, o negativo do plugue mono no negativo do plugue estéreo, e o pino
+do meio do plugue estéreo deve ficar desligado. Isso se deve porque se for
+usado um plugue mono na saída estérea do PC você "curto-circuita" a saída
+direita do PC, usando um plugue estéreo você só obtem o canal esquerdo da
+saída de som do PC, e a saída direita não é usada, mas também não é "curto-
+circuitada".
+  Abaixo um esquema em "ASCII Art":
+
+
+    _               _
+   / \             / \
+   \ /.............\ /
+   / \             / \
+   ===             ===
+   | |             | |
+   | |             | |
+   ===             | |
+   | |             | |
+   | |.............| |
+   | |             | |
+ --- ---         --- ---
+ |     |         |     |
+ |     |         |     |
+ |     |         |     |
+ |     |         |     |
+ |     |         |     |
+ |     |         |     |
+ -------         -------
+
+  Os pontos informam as ligações que devem ser feitas.
+  Após feito o cabo e ligado o plugue estéreo na saída de som da placa
+de som do PC e o plugue mono na entrada EAR do TK2000, ajuste o som do
+PC no máximo (Som Geral e Som Wave), no TK2000 digite o comando apropriado
+(normalmente "LOADT") e rode o programa, se tudo ocorrer bem o TK2000 irá
+conseguir ler o programa sem perceber que não é uma fita!
+
+Considerações Finais:
+=====================
+
+  É isso ai, espero que este programa seja muito útil aos "TK2000maníacos".
+
+COPYRIGHT:
+=========
+
+  Fábio Belavenuto - Copyright (C) 2004
+

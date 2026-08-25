@@ -1,0 +1,69 @@
+
+----------------------------------------------------------------------------------
+
+invocando o monitor
+
+>CALL -159 ou LM (invoca o monitor)
+@ (tecle CONTROL + C e depois ENTER para voltar ao basic)
+
+----------------------------------------------------------------------------------
+
+procedimento para invocar o mini assembler com a interface de disco desconectada
+
+digite:
+
+>ASS (invoca o mini assembler)
+!$FF61G (volta para o monitor)
+!$C2D3G (volta para o basic)
+
+----------------------------------------------------------------------------------
+
+procedimento para invocar o mini assembler com a interface de disco conectada
+
+depois de carregar o tkdos 3.3 digite:
+
+>BRUN MINIASM (carrega o miniassembler na memoria)
+>TK2000 (invoca o miniassembler)
+!$FF61G (volta para o monitor)
+!$C2D3G (volta para o basic)
+
+ou 
+
+>BRUN MINIASM (carrega o miniassembler na memoria)
+>CALL -159 ou LM (invoca o monitor)
+@03F8G (invoca o miniassembler)
+!$FF61G (volta para o monitor)
+!$C2D3G (volta para o basic)
+
+----------------------------------------------------------------------------------
+
+no core tk2000 portado para o mist ha uma soft switch para desligar
+a interface de disco
+
+
+>CALL -159 ou LM (invoca o monitor)
+@C041 (desliga a interface de disco)
+@ (tecle CONTROL + C e depois ENTER para voltar ao basic)
+>ASS (invoca o mini assembler)
+!$FF61G (volta para o monitor)
+!$C2D3G (volta para o basic)
+
+>CALL -159 ou LM (invoca o monitor)
+@C040 (liga a interface de disco)
+@ (tecle CONTROL + C e depois ENTER para voltar ao basic)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

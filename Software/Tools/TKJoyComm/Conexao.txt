@@ -1,0 +1,15 @@
+Porta do
+Joystick
+TK2000		PC
+O3 - 7		15 - D3
+O4 - 9		13 - D4
+O5 - 8		12 - D5
+O6 - 5		10 - D6
+O7 - 1		11 - D7
+I0 - 6		 2 - D0
+I4 - 2		 3 - D1
+
+Porta da
+Impressora
+TK2000		PC
+I6 - 14		 4 - D2
