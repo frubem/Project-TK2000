@@ -20,7 +20,7 @@ architecture while documenting the full hardware development process.
 8) TK2000 VDP Board: https://github.com/frubem/TK2000_VDPboard
 9) TK2000 VGA: https://github.com/frubem/TK2000-VGA
 
-## Software
+## Programs
 Includes utilities
 
 
