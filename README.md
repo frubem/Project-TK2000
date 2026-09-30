@@ -15,11 +15,11 @@ architecture while documenting the full hardware development process.
 2) TK2000 Build Notes: https://github.com/frubem/TK2000_Build_Notes
 3) TK2000 Keyboard: https://github.com/frubem/TK2KB
 4) TK2000 Bus Extender: https://github.com/frubem/TK2000_bus_extender 
-6) TK2000 Disk Interface: https://github.com/frubem/TK2000_DiskInterface_REDUX
-7) SDisk2 Floppy Drive Emulator: https://github.com/frubem/SDisk2
-8) TK2000 Fully Addressable Simple Twin Interface Digital I/O: https://github.com/frubem/TK2000_FASTIDIO
-9) TK2000 VDP Board: https://github.com/frubem/TK2000_VDPboard
-10) TK2000 VGA: https://github.com/frubem/TK2000-VGA
+5) TK2000 Disk Interface: https://github.com/frubem/TK2000_DiskInterface_REDUX
+6) SDisk2 Floppy Drive Emulator: https://github.com/frubem/SDisk2
+7) TK2000 Fully Addressable Simple Twin Interface Digital I/O: https://github.com/frubem/TK2000_FASTIDIO
+8) TK2000 VDP Board: https://github.com/frubem/TK2000_VDPboard
+9) TK2000 VGA: https://github.com/frubem/TK2000-VGA
 
 ## Programs
 Includes utilities
